@@ -1,7 +1,5 @@
 import pytest
 
-from app.thing import Thing
-
 '''
 x. A Character cannot Deal Damage to itself.
 
@@ -99,7 +97,7 @@ def test_dead_character_cannot_be_healed(rpg_char):
     assert rpg_char.Alive is False
 
 
-def test_character_cannot_be_healed_above_1000(rpg_char):
+def test_character_cannot_be_healed_above_1000_with_full_health(rpg_char):
     rpg_char.get_healed(100)
     assert rpg_char.Health == 1000
 

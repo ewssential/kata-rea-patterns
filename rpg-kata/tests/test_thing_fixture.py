@@ -1,10 +1,9 @@
 import pytest
-from app.thing import Thing
 
 
 @pytest.fixture
 def thing():
-    return Thing("Bob")
+    pass
 
 
 def test_correct_greeting(thing):
