@@ -3,25 +3,29 @@ import pytest
 '''
 x. A Character cannot Deal Damage to itself.
 
-0. A Character can Heal a Character.
-1. A Character can only Heal itself.
+x. A Character can Heal a Character.
+x. A Character can only Heal itself.
+
+own rules: increase level
 
 1. When dealing damage:
-    - If the target is 5 or more Levels above the attacker, Damage is reduced by 50%
+x.    - If the target is 5 or more Levels above the attacker, Damage is reduced by 50%
     - If the target is 5 or more Levels below the attacker, Damage is increased by 50%
 
 '''
 
 
 class RpgChar:
-    def __init__(self):
-        self.Health = 1000
-        self.Level = 1
+    def __init__(self, level=1, health=1000):
+        self.Health = health
+        self.Level = level
         self.Alive = True
 
     def attack(self, enemy, damage):
         if enemy is self:
             return
+        if enemy.Level - self.Level >= 5:
+            damage /= 2
         enemy.get_attacked(damage)
         return enemy
 
@@ -34,7 +38,7 @@ class RpgChar:
             self.Health = 0
             self.Alive = False
 
-    def get_healed(self, healing):
+    def healed(self, healing):
         if not self.Alive:
             return
         self.__heal(healing)
@@ -43,6 +47,10 @@ class RpgChar:
         self.Health += healing
         if self.Health > 1000:
             self.Health = 1000
+
+    def level_up(self):
+        self.Level += 1
+
 
 
 @pytest.fixture
@@ -86,28 +94,48 @@ def test_character_health_can_not_fall_beyond_zero(rpg_char):
 
 def test_healing_improves_health(rpg_char):
     rpg_char.get_attacked(999)
-    rpg_char.get_healed(100)
+    rpg_char.healed(100)
     assert rpg_char.Health == 1000 - 999 + 100
 
 
 def test_dead_character_cannot_be_healed(rpg_char):
     rpg_char.get_attacked(9999)
-    rpg_char.get_healed(100)
+    rpg_char.healed(100)
     assert rpg_char.Health == 0
     assert rpg_char.Alive is False
 
 
 def test_character_cannot_be_healed_above_1000_with_full_health(rpg_char):
-    rpg_char.get_healed(100)
+    rpg_char.healed(100)
     assert rpg_char.Health == 1000
 
 
 def test_character_cannot_be_healed_above_1000(rpg_char):
     rpg_char.get_attacked(50)
-    rpg_char.get_healed(100)
+    rpg_char.healed(100)
     assert rpg_char.Health == 1000
 
 
 def test_character_cannot_attack_itself(rpg_char):
     rpg_char.attack(rpg_char, 50)
     assert rpg_char.Health == 1000
+
+
+def test_character_can_increase_level(rpg_char):
+    rpg_char.level_up()
+    assert rpg_char.Level == 2
+
+    rpg_char.level_up()
+    assert rpg_char.Level == 3
+
+
+def test_target_is_5_or_more_levels_above_the_attacker_damage_is_halved(rpg_char):
+    target = RpgChar(level=6)
+    rpg_char.attack(target, 100)
+    assert target.Health == 1000 - 100 / 2
+
+
+def test_target_is_5_or_more_levels_above_the_attacker_odd_damage_is_halved(rpg_char):
+    target = RpgChar(level=6)
+    rpg_char.attack(target, 99)
+    assert target.Health == 1000 - 99 / 2
