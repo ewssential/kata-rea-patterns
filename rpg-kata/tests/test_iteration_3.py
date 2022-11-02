@@ -13,6 +13,14 @@ import rpgchar
 1. Characters must be in range to deal damage to a target.
 '''
 
+'''
+0 # # # #
+# 1 # 2 -
+# # # # #
+# 2 # 2 -
+# - # - -
+'''
+
 
 @pytest.fixture
 def rpg_char():
