@@ -1,5 +1,6 @@
-import pytest
 
+import pytest
+import rpgchar
 '''
 Iteration Three
 Characters have an attack Max Range.
@@ -12,54 +13,9 @@ Characters must be in range to deal damage to a target.
 '''
 
 
-class RpgChar:
-    def __init__(self, level=1, health=1000, alive=True):
-        self.Health = health
-        self.Level = level
-        self.Alive = alive
-
-    def attack(self, enemy, damage):
-        if enemy is self:
-            return self
-        return self.calculate_attack(damage, enemy)
-
-    def calculate_attack(self, damage, enemy):
-        if enemy.Level - self.Level >= 5:
-            damage //= 2
-        if self.Level - enemy.Level >= 5:
-            damage = int(damage * 1.5)
-        return enemy.get_attacked(damage)
-
-    def get_attacked(self, damage):
-        return self.__suffer_damage(damage)
-
-    def __suffer_damage(self, damage):
-        health = self.Health - damage
-        alive = True
-        if health <= 0:
-            health = 0
-            alive = False
-        return RpgChar(self.Level, health, alive)
-
-    def healed(self, healing):
-        if not self.Alive:
-            return self
-        return self.__heal(healing)
-
-    def __heal(self, healing):
-        health = self.Health + healing
-        if health > 1000:
-            health = 1000
-        return RpgChar(self.Level, health, self.Alive)
-
-    def level_up(self):
-        level = self.Level + 1
-        return RpgChar(level, self.Health, self.Alive)
-
-
 @pytest.fixture
 def rpg_char():
-    return RpgChar()
+    return rpgchar.RpgChar()
 
 
 def test_new_char_have_1000_health(rpg_char):
@@ -75,7 +31,7 @@ def test_new_char_is_born_alive(rpg_char):
 
 
 def test_char_can_deal_damage(rpg_char):
-    enemy = RpgChar()
+    enemy = rpgchar.RpgChar()
     enemy = rpg_char.attack(enemy, 100)
     assert enemy.Health == 1000 - 100
 
@@ -119,6 +75,8 @@ def test_character_cannot_be_healed_above_1000(rpg_char):
     rpg_char = rpg_char.healed(100)
     assert rpg_char.Health == 1000
 
+# iteration 2
+
 
 def test_character_cannot_attack_itself(rpg_char):
     rpg_char = rpg_char.attack(rpg_char, 50)
@@ -134,24 +92,24 @@ def test_character_can_increase_level(rpg_char):
 
 
 def test_target_is_5_or_more_levels_above_the_attacker_damage_is_halved(rpg_char):
-    target = RpgChar(level=6)
+    target = rpgchar.RpgChar(level=6)
     target = rpg_char.attack(target, 100)
     assert target.Health == 1000 - 100 // 2
 
 
 def test_target_is_5_or_more_levels_above_the_attacker_odd_damage_is_working(rpg_char):
-    target = RpgChar(level=6)
+    target = rpgchar.RpgChar(level=6)
     target = rpg_char.attack(target, 99)
     assert target.Health == 1000 - 99 // 2
 
 
 def test_target_is_5_or_more_levels_below_the_attacker_then_damage_is_50_percent_increased(rpg_char):
-    attacker = RpgChar(level=6)
+    attacker = rpgchar.RpgChar(level=6)
     rpg_char = attacker.attack(rpg_char, 100)
     assert rpg_char.Health == 1000 - int(100 * 1.5)
 
 
 def test_target_is_5_or_more_levels_below_the_attacker_then_odd_damage_is_working(rpg_char):
-    attacker = RpgChar(level=6)
+    attacker = rpgchar.RpgChar(level=6)
     rpg_char = attacker.attack(rpg_char, 99)
     assert rpg_char.Health == 1000 - int(99 * 1.5)
