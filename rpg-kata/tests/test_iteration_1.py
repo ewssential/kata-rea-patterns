@@ -2,14 +2,20 @@
 import pytest
 import rpgchar
 '''
-Iteration Three
-Characters have an attack Max Range.
+## Iteration One ##
 
-Melee fighters have a range of 2 meters.
+1. All Characters, when created, have:
+    - Health, starting at 1000
+    - Level, starting at 1
+    - May be Alive or Dead, starting Alive (Alive may be a true/false)
 
-Ranged fighters have a range of 20 meters.
+1. Characters can Deal Damage to Characters.
+    - Damage is subtracted from Health
+    - When damage received exceeds current Health, Health becomes 0 and the character dies
 
-Characters must be in range to deal damage to a target.
+1. A Character can Heal a Character.
+    - Dead characters cannot be healed
+    - Healing cannot raise health above 1000
 '''
 
 
@@ -75,41 +81,3 @@ def test_character_cannot_be_healed_above_1000(rpg_char):
     rpg_char = rpg_char.healed(100)
     assert rpg_char.Health == 1000
 
-# iteration 2
-
-
-def test_character_cannot_attack_itself(rpg_char):
-    rpg_char = rpg_char.attack(rpg_char, 50)
-    assert rpg_char.Health == 1000
-
-
-def test_character_can_increase_level(rpg_char):
-    rpg_char = rpg_char.level_up()
-    assert rpg_char.Level == 2
-
-    rpg_char = rpg_char.level_up()
-    assert rpg_char.Level == 3
-
-
-def test_target_is_5_or_more_levels_above_the_attacker_damage_is_halved(rpg_char):
-    target = rpgchar.RpgChar(level=6)
-    target = rpg_char.attack(target, 100)
-    assert target.Health == 1000 - 100 // 2
-
-
-def test_target_is_5_or_more_levels_above_the_attacker_odd_damage_is_working(rpg_char):
-    target = rpgchar.RpgChar(level=6)
-    target = rpg_char.attack(target, 99)
-    assert target.Health == 1000 - 99 // 2
-
-
-def test_target_is_5_or_more_levels_below_the_attacker_then_damage_is_50_percent_increased(rpg_char):
-    attacker = rpgchar.RpgChar(level=6)
-    rpg_char = attacker.attack(rpg_char, 100)
-    assert rpg_char.Health == 1000 - int(100 * 1.5)
-
-
-def test_target_is_5_or_more_levels_below_the_attacker_then_odd_damage_is_working(rpg_char):
-    attacker = rpgchar.RpgChar(level=6)
-    rpg_char = attacker.attack(rpg_char, 99)
-    assert rpg_char.Health == 1000 - int(99 * 1.5)
